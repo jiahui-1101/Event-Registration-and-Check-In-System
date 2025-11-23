@@ -551,7 +551,7 @@ void SystemManager::loadParticipantsFromFile()
         getline(ss, checkedInStr, ',');
         getline(ss, checkInTime, ',');
 
-        Participant p(name, email, id, eventID, regTime);
+        Participant p(id,name, email, eventID, regTime);
         if (checkedInStr == "true")
         {
             p.setCheckedIn(checkInTime);
