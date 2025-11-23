@@ -3,6 +3,7 @@
 
 #include <string>
 
+
 class Participant {
 private:
     std::string name;
