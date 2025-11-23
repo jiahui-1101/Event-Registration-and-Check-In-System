@@ -3,6 +3,7 @@
 #include <ctime>
 #include <sstream>
 #include <iomanip>
+#include <limits>
 
 using namespace std;
 
@@ -290,42 +291,52 @@ void SystemManager::attendanceDashboard()
 
 void SystemManager::checkInParticipant(string eventID)
 {
-    cout << "\n--- Check-In Participant for Event " << eventID << " ---\n";
-    string searchKey;
-    cout << "Enter Participant ID: ";
-    getline(cin, searchKey);
-
-    int index = searchParticipantByID(searchKey);
-
-    if (index == -1)
+    char continueChoice;
+    do
     {
-        cout << "❌ Participant not found for this event.\n";
-        return;
-    }
+        cout << "\n--- Check-In Participant for Event " << eventID << " ---\n";
+        string participantID;
+         // ============ STEP 1: CHECK EXISTING PARTICIPANT ============
+        cout << "Enter Participant ID: ";
+        getline(cin, participantID);
 
-    Participant &p = participants[index];
+        int existingIndex = searchParticipantByID(participantID);
 
-    if (p.getEventID() != eventID)
-    {
-        cout << "❌ Participant is not registered for this event.\n";
-        return;
-    }
+        if (existingIndex == -1)
+        {
+            cout << "❌ Participant not found for this event.\n";
+            return;
+        }
 
-    if (p.isCheckedIn())
-    {
-        cout << "⚠️ Participant " << p.getName() << " has already checked in at " << p.getCheckInTime() << ".\n";
-        return;
-    }
+        Participant &p = participants[existingIndex];
 
-    time_t now = time(0);
-    string checkInTime = ctime(&now);
-    if (!checkInTime.empty() && checkInTime.back() == '\n')
-        checkInTime.pop_back();
+        if (p.getEventID() != eventID)
+        {
+            cout << "❌ Participant is not registered for this event.\n";
+            return;
+        }
 
-    p.setCheckedIn(checkInTime);
+        if (p.isCheckedIn())
+        {
+            cout << "⚠️ Participant " << p.getName() << " has already checked in at " << p.getCheckInTime() << ".\n";
+            return;
+        }
+        
+        // ============ STEP 2: CHECK-IN PARTICIPANT ============
+        time_t now = time(0);
+        string checkInTime = ctime(&now);
+        if (!checkInTime.empty() && checkInTime.back() == '\n')
+            checkInTime.pop_back();
 
-    cout << "✅ Participant " << p.getName() << " (ID: " << p.getID() << ") successfully checked in at " << checkInTime << ".\n";
-    saveParticipantsToFile();
+        p.setCheckedIn(checkInTime);
+
+        cout << "✅ Participant " << p.getName() << " (ID: " << p.getID() << ") successfully checked in at " << checkInTime << ".\n";
+        saveParticipantsToFile();
+
+        cout << "Do you want to check in another participant? (y/n): ";
+        cin >> continueChoice;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    } while (continueChoice == 'y' || continueChoice == 'Y');
 }
 
 void SystemManager::viewCheckInStatus(string eventID)
