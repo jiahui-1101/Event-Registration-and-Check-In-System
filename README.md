@@ -1,8 +1,5 @@
 # Event-Registration-and-Check-In-System 
 
----
-## just simple explanation version
----
 ## Objective
 
 To develop a system that allows participants to register and verify for events, and enables admins and organizers to manage events and track attendance efficiently.
@@ -66,5 +63,5 @@ To develop a system that allows participants to register and verify for events, 
    * Alerts organizer to prevent overcrowding.
 
 ---
-
+## just simple explanation version
 
