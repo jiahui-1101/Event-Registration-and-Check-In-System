@@ -290,7 +290,42 @@ void SystemManager::attendanceDashboard()
 
 void SystemManager::checkInParticipant(string eventID)
 {
-    cout << "[Feature 5] Check-in Participant for Event " << eventID << " - Not implemented yet\n";
+    cout << "\n--- Check-In Participant for Event " << eventID << " ---\n";
+    string searchKey;
+    cout << "Enter Participant ID: ";
+    getline(cin, searchKey);
+
+    int index = searchParticipantByID(searchKey);
+
+    if (index == -1)
+    {
+        cout << "❌ Participant not found for this event.\n";
+        return;
+    }
+
+    Participant &p = participants[index];
+
+    if (p.getEventID() != eventID)
+    {
+        cout << "❌ Participant is not registered for this event.\n";
+        return;
+    }
+
+    if (p.isCheckedIn())
+    {
+        cout << "⚠️ Participant " << p.getName() << " has already checked in at " << p.getCheckInTime() << ".\n";
+        return;
+    }
+
+    time_t now = time(0);
+    string checkInTime = ctime(&now);
+    if (!checkInTime.empty() && checkInTime.back() == '\n')
+        checkInTime.pop_back();
+
+    p.setCheckedIn(checkInTime);
+
+    cout << "✅ Participant " << p.getName() << " (ID: " << p.getID() << ") successfully checked in at " << checkInTime << ".\n";
+    saveParticipantsToFile();
 }
 
 void SystemManager::viewCheckInStatus(string eventID)
