@@ -29,7 +29,7 @@ void SystemManager::mainMenu()
         cout << "0. Exit System\n";
         cout << "Enter your choice: ";
         cin >> choice;
-        cin.ignore();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
         switch (choice)
         {
@@ -113,7 +113,7 @@ void SystemManager::organizerMenu(int orgIndex)
         cout << "0. Back to Main Menu\n";
         cout << "Enter your choice: ";
         cin >> choice;
-        cin.ignore();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
         switch (choice)
         {
@@ -151,7 +151,7 @@ void SystemManager::adminMenu()
         cout << "0. Back to Main Menu\n";
         cout << "Enter your choice: ";
         cin >> choice;
-        cin.ignore();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
         switch (choice)
         {
