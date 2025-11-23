@@ -2,7 +2,6 @@
 #define PARTICIPANT_H
 
 #include <string>
-#include <vector>
 
 class Participant {
 private:
@@ -16,16 +15,15 @@ private:
 
 public:
     Participant();
-    Participant(std::string name, std::string email, std::string id, std::string eventID, std::string time);
+    Participant(std::string n, std::string e, std::string i, std::string evID, std::string time);
 
-    // Getters & Setters
-    std::string getName();
-    std::string getEmail();
-    std::string getID();
-    std::string getEventID();
-    std::string getRegistrationTime();
-    bool isCheckedIn();
-    std::string getCheckInTime();
+    std::string getName() const;
+    std::string getEmail() const;
+    std::string getID() const;
+    std::string getEventID() const;
+    std::string getRegistrationTime() const;
+    bool isCheckedIn() const;
+    std::string getCheckInTime() const;
 
     void setCheckedIn(std::string time);
     void setName(std::string newName);

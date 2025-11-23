@@ -16,12 +16,12 @@ public:
     Event(std::string id, std::string name, std::string date, std::string time, std::string venue, int cap);
 
     // Getters
-    std::string getEventID();
-    std::string getEventName();
-    std::string getEventDate();
-    std::string getEventTime();
-    std::string getVenue();
-    int getCapacity();
+    std::string getEventID() const;
+    std::string getEventName() const;
+    std::string getEventDate() const;
+    std::string getEventTime() const;
+    std::string getVenue() const;
+    int getCapacity() const;
 };
 
 #endif
