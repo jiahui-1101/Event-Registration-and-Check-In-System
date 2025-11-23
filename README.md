@@ -63,5 +63,5 @@ To develop a system that allows participants to register and verify for events, 
    * Alerts organizer to prevent overcrowding.
 
 ---
-## just simple explanation version
+just simple explanation version
 
