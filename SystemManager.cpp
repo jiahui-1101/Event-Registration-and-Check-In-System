@@ -32,20 +32,26 @@ void SystemManager::mainMenu()
         case 1:
             participantMenu();
             break;
+
         case 2:
+        {
             int orgIndex = loginOrganizer();
             if (orgIndex != -1)
                 organizerMenu(orgIndex);
-            break;
+        }
+        break;
 
         case 3:
+        {
             if (loginAdmin())
                 adminMenu();
-            break;
+        }
+        break;
 
         case 0:
             cout << "Exiting system...\n";
             break;
+
         default:
             cout << "Invalid input. Try again.\n";
         }
@@ -171,15 +177,6 @@ void SystemManager::registerParticipant()
     cout << "[Feature 1] Register Participant - Not implemented yet\n";
 }
 
-/*************  ✨ Windsurf Command ⭐  *************/
-/**
- * @brief Participant Self Check
- * 
- * This function is responsible for checking the registration status of a participant.
- * 
- * @note Not implemented yet
- */
-/*******  7e64b932-f275-482e-958c-b95612e7c269  *******/
 void SystemManager::participantSelfCheck()
 {
     cout << "[Feature 2] Participant Self Check - Not implemented yet\n";
