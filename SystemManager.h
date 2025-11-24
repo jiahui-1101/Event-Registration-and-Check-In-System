@@ -2,6 +2,7 @@
 #define SYSTEMMANAGER_H
 
 #include <string>
+#include <fstream>
 #include "Participant.h"
 #include "Event.h"
 #include "EventOrganizer.h"
@@ -41,7 +42,8 @@ public:
     int searchParticipantByID(std::string id);
     int searchParticipantByEmail(std::string email);
     int searchEventByID(std::string eventID);
-
+    int SequenceSearchParticipant(std::string search_key, Participant array[], int array_size, bool searchByID);
+    int SequenceSearchEvent(std::string search_key, Event array[], int array_size);
     void sortByName();
     void sortByRegistrationTime();
     void sortByID();
@@ -49,6 +51,19 @@ public:
     // login function
     int loginOrganizer();
     bool loginAdmin();
+
+    // ID generation
+    std::string generateParticipantID();
+    
+    // Display functions
+    void displayRegistrationInfo(const Participant &participant);
+
+    // File handling functions
+    void loadEventsFromFile();
+    void loadParticipantsFromFile();
+    void loadOrganizersFromFile();
+    void loadAllFromFile();
+    void saveParticipantsToFile();
 };
 
 #endif

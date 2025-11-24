@@ -3,11 +3,12 @@
 
 #include <string>
 
+
 class Participant {
 private:
+    std::string id;
     std::string name;
     std::string email;
-    std::string id;
     std::string eventID;
     std::string registrationTime;
     bool checkedIn;
@@ -15,7 +16,7 @@ private:
 
 public:
     Participant();
-    Participant(std::string n, std::string e, std::string i, std::string evID, std::string time);
+    Participant(std::string i, std::string n, std::string e, std::string evID, std::string time);
 
     std::string getName() const;
     std::string getEmail() const;

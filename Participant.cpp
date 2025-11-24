@@ -4,20 +4,20 @@ using namespace std;
 
 Participant::Participant()
 {
+    id = "";
     name = "";
     email = "";
-    id = "";
     eventID = "";
     registrationTime = "";
     checkedIn = false;
     checkInTime = "";
 }
 
-Participant::Participant(string n, string e, string i, string evID, string time)
+Participant::Participant(string i,string n, string e, string evID, string time)
 {
+    id = i;
     name = n;
     email = e;
-    id = i;
     eventID = evID;
     registrationTime = time;
     checkedIn = false;

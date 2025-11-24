@@ -1,0 +1,5 @@
+E001,Tech Conference 2024,2024-04-15,09:00:00,Main Auditorium,200
+E002,Startup Workshop,2024-04-16,14:00:00,Room 101,50
+E003,AI Innovation Summit,2024-04-17,10:30:00,Conference Hall,150
+E004,Digital Marketing Masterclass,2024-04-18,13:00:00,Training Room,30
+E005,Leadership Symposium,2024-04-19,09:30:00,Grand Ballroom,100
