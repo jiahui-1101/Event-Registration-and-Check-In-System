@@ -276,7 +276,50 @@ void SystemManager::registerParticipant()
 
 void SystemManager::participantSelfCheck()
 {
-    cout << "[Feature 2] Participant Self Check - Not implemented yet\n";
+    cout << "\n--- [Feature 2] Check Registration Status ---\n";
+
+    string input;
+    cout << "Please Enter your Email or Particpant ID to verify: ";
+    getline(cin, input); //get participant email or ID from user input
+
+    //search participant by email first
+    int index = searchParticipantByEmail(input);
+
+    if (index == -1) // if email not found, search by ID
+    {
+        index = searchParticipantByID(input);
+    }
+
+    if (index != -1) // if participant found
+    {
+       Participant &p = participants[index];
+
+        string eventName = "Unknown Event"; //get event name
+        int eventIndex = searchEventByID(p.getEventID());
+        if (eventIndex != -1) {
+            eventName = events[eventIndex].getEventName();
+        }
+        
+        cout << "\n✅ Record Found!\n";
+        cout << "=================================\n";
+        cout << "Name: " << p.getName() << "\n";
+        //cout << "Event ID: " << p.getEventID() << "\n";
+        cout << "Event: " << eventName << " (" << p.getEventID() << ")\n";
+        cout << "Registration Time: " << p.getRegistrationTime() << "\n";
+        // display check-in status
+        cout << "Status: " << (p.isCheckedIn() ? "Checked-In" : "Registered Only") << "\n";
+        
+        if (p.isCheckedIn()) {
+            cout << "Check-in Time: " << p.getCheckInTime() << "\n";
+        }
+        cout << "=================================\n";
+    }
+    else
+    {
+        cout << "❌ Participant not found.\n";
+    }
+    cout << "\nPress Enter to continue...";
+    cin.get();
 }
 
 void SystemManager::sortParticipantList()
@@ -341,7 +384,74 @@ void SystemManager::checkInParticipant(string eventID)
 
 void SystemManager::viewCheckInStatus(string eventID)
 {
-    cout << "[Feature 6] View Check-in Status for Event " << eventID << " - Not implemented yet\n";
+    cout << "\n--- [Feature 6] Check-In Status List for Event: " << eventID << " ---\n";
+
+    //CREATE ARRAYS TO HOLD CHECKED-IN AND NOT CHECKED-IN PARTICIPANTS
+    Participant checkedInList[1000];
+    Participant notCheckedInList[1000];
+    int ciCount = 0; // number of checked-in participants
+    int nciCount = 0; // number of not checked-in participants
+
+    //TRANVERSING participant list, filtering checked-in and not checked-in
+    for (int i = 0; i < participantCount; i++){
+        if (participants[i].getEventID() == eventID){ //only for the specified event
+            if (participants[i].isCheckedIn()){
+                checkedInList[ciCount] = participants[i];
+                ciCount++;
+            }
+            else{
+                notCheckedInList[nciCount] = participants[i];
+                nciCount++;
+            }
+        }
+    }
+    //SORTING (BUBBLE SORT)
+    for (int i = 0; i < ciCount - 1; i++){ //SORTING checked-in list
+        for (int j = 0; j < ciCount - i - 1; j++){
+            //COMPARING NAMES, SWAP IF j > j+1
+            if (checkedInList[j].getName() > checkedInList[j + 1].getName()){
+                //swap(checkedInList[j], checkedInList[j + 1]);
+                Participant temp = checkedInList[j];
+                checkedInList[j] = checkedInList[j + 1];
+                checkedInList[j + 1] = temp;
+            }
+        }
+    }
+
+    for (int i = 0; i < nciCount - 1; i++){ //SORTING not checked-in list
+        for (int j = 0; j < nciCount - i - 1; j++){
+            //COMPARING NAMES, SWAP IF j > j+1
+            if (notCheckedInList[j].getName() > notCheckedInList[j + 1].getName()){
+                Participant temp = notCheckedInList[j];
+                notCheckedInList[j] = notCheckedInList[j + 1];
+                notCheckedInList[j + 1] = temp;
+            }
+        }
+    }
+    //DISPLAYING CHECKED-IN PARTICIPANTS
+    cout << "\n--- Checked-In Participants ---\n";
+    cout << left << setw(10) << "ID" << setw(25) << "Name" << "Check-in Time\n";
+    cout << "----------------------------------------------------------------\n";
+    if (ciCount == 0) cout << "(None)\n";
+    for (int i = 0; i < ciCount; i++) {
+        cout << left << setw(10) << checkedInList[i].getID() 
+             << setw(25) << checkedInList[i].getName() 
+             << checkedInList[i].getCheckInTime() << "\n";
+    }
+
+    //DISPLAYING NOT CHECKED-IN PARTICIPANTS
+    cout << "\n--- Not Checked-In Participants ---\n";
+    cout << left << setw(10) << "ID" << setw(25) << "Name" << "Email\n";
+    cout << "----------------------------------------------------------------\n";
+    if (nciCount == 0) cout << "(None)\n";
+    for (int i = 0; i < nciCount; i++) {
+        cout << left << setw(10) << notCheckedInList[i].getID() 
+             << setw(25) << notCheckedInList[i].getName() 
+             << notCheckedInList[i].getEmail() << "\n";
+    }
+
+    cout << "\nPress Enter to continue...";
+    cin.get();
 }
 
 void SystemManager::checkCapacityAlert(string eventID)
