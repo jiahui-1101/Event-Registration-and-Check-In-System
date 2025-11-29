@@ -327,9 +327,41 @@ void SystemManager::sortParticipantList()
     cout << "[Feature 3] Sorting Participant List - Not implemented yet\n";
 }
 
+
+// Feature 4: attendance dashboard
 void SystemManager::attendanceDashboard()
 {
-    cout << "[Feature 4] Attendance Dashboard - Not implemented yet\n";
+    cout << "\n --- [Feature 4] Attendance Dashboard ---\n";
+    cout << "\n========================================" << endl;
+    cout << "      EVENT ATTENDANCE DASHBOARD        " << endl;
+    cout << "========================================" << endl;
+    int totalRegistered = participantCount; 
+    int totalCheckedIn = 0;
+    int totalNotCheckedIn = 0;
+    for (int i = 0; i < participantCount; i++) {
+        if (participants[i].isCheckedIn()) { 
+             totalCheckedIn++;
+        } else {
+             totalNotCheckedIn++;
+        }
+    }
+
+    //calculate percentage
+    double attendancePercent = 0.0;
+    if (totalRegistered > 0) {
+        // Cast to double to ensure decimal precision
+        attendancePercent = ((double)totalCheckedIn / totalRegistered) * 100.0;
+    }
+    cout << left << setw(25) << "Total Registered:" << totalRegistered << endl;
+    cout << left << setw(25) << "Total Checked-In:" << totalCheckedIn << endl;
+    cout << left << setw(25) << "Total Not Checked-In:" << totalNotCheckedIn << endl;
+    cout << "----------------------------------------" << endl;
+    cout << fixed << setprecision(2); // Set decimal precision for percentage
+    cout << left << setw(25) << "Attendance Percentage:" << attendancePercent << "%" << endl;
+    cout << "========================================" << endl;
+    
+    cout << "\nPress Enter to continue...";
+    cin.get();
 }
 
 void SystemManager::checkInParticipant(string eventID)
@@ -365,6 +397,30 @@ void SystemManager::checkInParticipant(string eventID)
             return;
         }
         
+         //stop checking in if the event is full
+    int eventIndex = searchEventByID(eventID);
+        if (eventIndex != -1) {
+            int maxCap = events[eventIndex].getCapacity();
+            
+            // 1. Count how many people are ALREADY checked in
+            int currentCount = 0;
+            for(int i = 0; i < participantCount; i++) {
+                if(participants[i].getEventID() == eventID && participants[i].isCheckedIn()) {
+                    currentCount++;
+                }
+            }
+
+            // 2. BLOCK THE CHECK-IN if the event is full
+            if (currentCount >= maxCap) {
+                cout << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+                cout << "⛔ CHECK-IN BLOCKED: EVENT IS FULL! ⛔" << endl;
+                cout << "Current Status: " << currentCount << "/" << maxCap << endl;
+                cout << "System blocked " << p.getName() << " from entering." << endl;
+                cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+                return; // <--- THIS IS KEY. It stops the function before check-in happens.
+            }
+        }
+
         // ============ STEP 2: CHECK-IN PARTICIPANT ============
         time_t now = time(0);
         string checkInTime = ctime(&now);
@@ -380,6 +436,8 @@ void SystemManager::checkInParticipant(string eventID)
         cin >> continueChoice;
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
     } while (continueChoice == 'y' || continueChoice == 'Y');
+
+   
 }
 
 void SystemManager::viewCheckInStatus(string eventID)
@@ -456,7 +514,45 @@ void SystemManager::viewCheckInStatus(string eventID)
 
 void SystemManager::checkCapacityAlert(string eventID)
 {
-    cout << "[Feature 8] Capacity Alert for Event " << eventID << " - Not implemented yet\n";
+    cout << "\n--- [Feature 8] Capacity Monitor for Event: " << eventID << " ---\n";
+
+    // 1. Get Event Capacity
+    int eventIndex = searchEventByID(eventID);
+    if (eventIndex == -1) {
+        cout << "❌ Error: Event not found.\n";
+        return;
+    }
+    int maxCapacity = events[eventIndex].getCapacity();
+    string eventName = events[eventIndex].getEventName();
+
+    // 2. Count Current Check-Ins for this specific event
+    int currentCheckIns = 0;
+    for (int i = 0; i < participantCount; i++) {
+        // Only count if they are in THIS event AND checked in
+        if (participants[i].getEventID() == eventID && participants[i].isCheckedIn()) {
+            currentCheckIns++;
+        }
+    }
+
+    // 3. Display Status
+    cout << "Event: " << eventName << endl;
+    cout << "Status: " << currentCheckIns << " / " << maxCapacity << " Checked In.\n";
+    cout << "----------------------------------------\n";
+
+    // 4. Alert Logic
+    if (currentCheckIns >= maxCapacity) {
+        cout << "🔴 CRITICAL ALERT: EVENT FULL!\n";
+        cout << "   No further check-ins will be allowed.\n";
+    } 
+    else if (currentCheckIns >= (maxCapacity * 0.9)) {
+        cout << "⚠️  WARNING: Near Capacity (Over 90%)\n";
+    } 
+    else {
+        cout << "🟢 Status Normal. Capacity available.\n";
+    }
+
+    cout << "\nPress Enter to continue...";
+    cin.get();
 }
 
 void SystemManager::createEvent()
