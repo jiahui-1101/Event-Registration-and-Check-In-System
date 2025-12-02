@@ -64,6 +64,7 @@ public:
     void loadOrganizersFromFile();
     void loadAllFromFile();
     void saveParticipantsToFile();
+    void saveEventsToFile();
 };
 
 #endif

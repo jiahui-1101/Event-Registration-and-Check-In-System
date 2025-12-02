@@ -643,6 +643,8 @@ void SystemManager::createEvent()
 
     cout << "\n✅ Event '" << name << "' created successfully!\n";
     cout << "ID: " << id << " | Capacity: " << capacity << endl;
+
+    saveEventsToFile();
 }
 
 // =======================
@@ -941,4 +943,32 @@ void SystemManager::saveParticipantsToFile()
     }
     file.close();
     cout << "💾 Saved " << participantCount << " participants to file.\n";
+}
+
+// =======================
+// FILE SAVING FUNCTIONS (新增)
+// =======================
+
+void SystemManager::saveEventsToFile()
+{
+    ofstream file("events.txt");
+    
+    if (!file.is_open())
+    {
+        cout << "❌ Error: Cannot save events to file (events.txt)! Permissions denied or path error.\n";
+        return;
+    }
+
+    for (int i = 0; i < eventCount; i++)
+    {
+        file << events[i].getEventID() << ","
+             << events[i].getEventName() << ","
+             << events[i].getEventDate() << ","
+             << events[i].getEventTime() << ","
+             << events[i].getVenue() << ","
+             << events[i].getCapacity() << "\n"; 
+    }
+    
+    file.close();
+    cout << "💾 Saved " << eventCount << " events to file.\n";
 }
