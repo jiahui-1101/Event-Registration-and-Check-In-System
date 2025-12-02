@@ -258,7 +258,7 @@ void SystemManager::registerParticipant()
     if (!registrationTime.empty() && registrationTime.back() == '\n')
         registrationTime.pop_back();
 
-    Participant newParticipant(name, email, newID, eventID, registrationTime);
+    Participant newParticipant(newID, name, email, eventID, registrationTime);;
 
     // ============ STEP 5: Add to system ============
     if (participantCount < 1000)
@@ -324,7 +324,49 @@ void SystemManager::participantSelfCheck()
 
 void SystemManager::sortParticipantList()
 {
-    cout << "[Feature 3] Sorting Participant List - Not implemented yet\n";
+    int choice;
+
+    if (participantCount == 0) {
+        cout << "⚠️ No participants to sort.\n";
+        return;
+    }
+
+    cout << "Sort by:\n";
+    cout << "1. Name (Alphabetical)\n";
+    cout << "2. Participant ID (Ascending)\n";
+    cout << "3. Registration Time (Newest First)\n";
+    cout << "0. Cancel\n";
+    cout << "Enter your choice: ";
+
+    cin >> choice;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    switch (choice)
+    {
+    case 1:
+        sortByName();
+        cout << "✅ Participant list sorted by Name.\n";
+        break;
+    case 2:
+        sortByID();
+        cout << "✅ Participant list sorted by ID.\n";
+        break;
+    case 3:
+        sortByRegistrationTime();
+        cout << "✅ Participant list sorted by Registration Time (Newest First).\n";
+        break;
+    case 0:
+        cout << "Sort cancelled.\n";
+        return;
+    default:
+        cout << "Invalid choice. Sort cancelled.\n";
+    }
+
+    saveParticipantsToFile();
+
+    cout << "\nPress Enter to continue...";
+    cin.get();
+
 }
 
 
@@ -557,7 +599,50 @@ void SystemManager::checkCapacityAlert(string eventID)
 
 void SystemManager::createEvent()
 {
-    cout << "[Feature 7] Create Event - Not implemented yet\n";
+    if (eventCount >= 100) {
+        cout << "❌ Error: Event database is full! (Max 100 events).\n";
+        return;
+    }
+
+    string id, name, date, time, venue;
+    int capacity;
+
+    // STEP 1: Event ID (must be unique)
+    while (true) {
+        cout << "Enter new Event ID (e.g., E001): ";
+        getline(cin, id);
+
+        if (searchEventByID(id) == -1) {
+            break; // ID is unique
+        }
+        cout << "❌ Error: Event ID '" << id << "' already exists. Try again.\n";
+    }
+
+    // STEP 2: Get other details
+    cout << "Enter Event Name: ";
+    getline(cin, name);
+    cout << "Enter Date (DD/MM/YYYY): ";
+    getline(cin, date);
+    cout << "Enter Time (HH:MM AM/PM): ";
+    getline(cin, time);
+    cout << "Enter Venue: ";
+    getline(cin, venue);
+
+    // STEP 3: Capacity Input (must be a positive number)
+    cout << "Enter Max Capacity: ";
+    while (!(cin >> capacity) || capacity <= 0) {
+        cout << "❌ Invalid input. Capacity must be a positive number. Enter again: ";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear buffer after int input
+
+    // STEP 4: Add to system and save
+    Event newEvent(id, name, date, time, venue, capacity);
+    events[eventCount++] = newEvent;
+
+    cout << "\n✅ Event '" << name << "' created successfully!\n";
+    cout << "ID: " << id << " | Capacity: " << capacity << endl;
 }
 
 // =======================
@@ -619,9 +704,43 @@ int SystemManager::SequenceSearchEvent(string search_key, Event array[], int arr
 // =======================
 // SORT METHODS
 // =======================
-void SystemManager::sortByName() {}
-void SystemManager::sortByRegistrationTime() {}
-void SystemManager::sortByID() {}
+void SystemManager::sortByName() {
+    for (int i = 0; i < participantCount - 1; i++) {
+        for (int j = 0; j < participantCount - i - 1; j++) {
+            if (participants[j].getName() > participants[j + 1].getName()) {
+                Participant temp = participants[j];
+                participants[j] = participants[j + 1];
+                participants[j + 1] = temp;
+            }
+        }
+    }
+}
+void SystemManager::sortByRegistrationTime() {
+    if (participantCount <= 1) {
+        return;
+    }
+
+    for (int i = 0; i < participantCount - 1; i++) {
+        for (int j = 0; j < participantCount - i - 1; j++) {
+            if (participants[j].getRegistrationTime() < participants[j + 1].getRegistrationTime()) {
+                Participant temp = participants[j];
+                participants[j] = participants[j + 1];
+                participants[j + 1] = temp;
+            }
+        }
+    }
+}
+void SystemManager::sortByID() {
+    for (int i = 0; i < participantCount - 1; i++) {
+        for (int j = 0; j < participantCount - i - 1; j++) {
+            if (participants[j].getID() > participants[j + 1].getID()) {
+                Participant temp = participants[j];
+                participants[j] = participants[j + 1];
+                participants[j + 1] = temp;
+            }
+        }
+    }
+}
 
 // =======================
 // LOGIN FUNCTIONS
