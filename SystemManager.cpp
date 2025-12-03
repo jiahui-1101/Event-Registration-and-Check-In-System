@@ -706,17 +706,27 @@ int SystemManager::SequenceSearchEvent(string search_key, Event array[], int arr
 // =======================
 // SORT METHODS
 // =======================
+
+//insertion sort
 void SystemManager::sortByName() {
-    for (int i = 0; i < participantCount - 1; i++) {
-        for (int j = 0; j < participantCount - i - 1; j++) {
-            if (participants[j].getName() > participants[j + 1].getName()) {
-                Participant temp = participants[j];
-                participants[j] = participants[j + 1];
-                participants[j + 1] = temp;
-            }
+    if (participantCount <= 1) {
+        return;
+    }
+
+    for (int i = 1; i < participantCount; i++) {
+        Participant key = participants[i];
+        int j = i - 1;
+
+        while (j >= 0 && participants[j].getName() > key.getName()) {
+            participants[j + 1] = participants[j];
+            j = j - 1;
         }
+
+        participants[j + 1] = key;
     }
 }
+
+//bubble sort
 void SystemManager::sortByRegistrationTime() {
     if (participantCount <= 1) {
         return;
@@ -732,14 +742,28 @@ void SystemManager::sortByRegistrationTime() {
         }
     }
 }
+
+//selection sort
 void SystemManager::sortByID() {
+    if (participantCount <= 1) {
+        return;
+    }
+
+    int min_idx;
+
     for (int i = 0; i < participantCount - 1; i++) {
-        for (int j = 0; j < participantCount - i - 1; j++) {
-            if (participants[j].getID() > participants[j + 1].getID()) {
-                Participant temp = participants[j];
-                participants[j] = participants[j + 1];
-                participants[j + 1] = temp;
+        min_idx = i;
+
+        for (int j = i + 1; j < participantCount; j++) {
+            if (participants[j].getID() < participants[min_idx].getID()) {
+                min_idx = j;
             }
+        }
+
+        if (min_idx != i) {
+            Participant temp = participants[i];
+            participants[i] = participants[min_idx];
+            participants[min_idx] = temp;
         }
     }
 }
@@ -946,7 +970,7 @@ void SystemManager::saveParticipantsToFile()
 }
 
 // =======================
-// FILE SAVING FUNCTIONS (新增)
+// FILE SAVING FUNCTIONS 
 // =======================
 
 void SystemManager::saveEventsToFile()
