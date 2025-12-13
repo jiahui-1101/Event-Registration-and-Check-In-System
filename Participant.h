@@ -3,7 +3,6 @@
 
 #include <string>
 
-
 class Participant {
 private:
     std::string id;
@@ -13,6 +12,7 @@ private:
     std::string registrationTime;
     bool checkedIn;
     std::string checkInTime;
+    Participant* next;
 
 public:
     Participant();
@@ -30,6 +30,8 @@ public:
     void setName(std::string newName);
     void setEmail(std::string newEmail);
     void setEventID(std::string newEvent);
+    Participant* getNext() const;
+    void setNext(Participant* nextNode);
 };
 
 #endif

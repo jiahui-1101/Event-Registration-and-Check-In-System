@@ -8,6 +8,7 @@ private:
     std::string organizerID;
     std::string password;
     std::string eventID;
+    EventOrganizer* next;
 
 public:
     EventOrganizer();
@@ -19,6 +20,8 @@ public:
 
     void setPassword(std::string newPw);
     void setEventID(std::string newEventID);
+    EventOrganizer* getNext() const;
+    void setNext(EventOrganizer* nextNode);
 };
 
 #endif

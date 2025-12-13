@@ -10,6 +10,7 @@ private:
     std::string eventTime;
     std::string venue;
     int capacity;
+    Event* next;
 
 public:
     Event();
@@ -21,6 +22,8 @@ public:
     std::string getEventTime() const;
     std::string getVenue() const;
     int getCapacity() const;
+    Event* getNext() const;
+    void setNext(Event* nextNode);
 };
 
 #endif

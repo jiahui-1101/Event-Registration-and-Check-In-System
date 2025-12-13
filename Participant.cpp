@@ -11,9 +11,10 @@ Participant::Participant()
     registrationTime = "";
     checkedIn = false;
     checkInTime = "";
+    next = NULL;
 }
 
-Participant::Participant(string i,string n, string e, string evID, string time)
+Participant::Participant(string i, string n, string e, string evID, string time)
 {
     id = i;
     name = n;
@@ -22,6 +23,7 @@ Participant::Participant(string i,string n, string e, string evID, string time)
     registrationTime = time;
     checkedIn = false;
     checkInTime = "";
+    next = NULL;
 }
 
 string Participant::getName() const
@@ -78,4 +80,14 @@ void Participant::setEmail(string newEmail)
 void Participant::setEventID(string newEvent)
 {
     eventID = newEvent;
+}
+
+Participant* Participant::getNext() const
+{
+    return next;
+}
+
+void Participant::setNext(Participant* nextNode)
+{
+    next = nextNode;
 }

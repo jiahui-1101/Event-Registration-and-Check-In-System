@@ -10,53 +10,60 @@
 class SystemManager
 {
 private:
-    Participant participants[1000];
+    Participant* participantHead;
     int participantCount;
 
-    Event events[100];
+    Event* eventHead;
     int eventCount;
 
-    EventOrganizer organizers[100];
+    EventOrganizer* organizerHead;
     int organizerCount;
+
+    // void swapParticipantData(Participant* a, Participant* b);
 
 public:
     SystemManager();
+    ~SystemManager();
 
     // Menus
     void mainMenu();
     void participantMenu();
-    void organizerMenu(int orgIndex);
+    
+    void organizerMenu(EventOrganizer* organizer);
     void adminMenu();
 
     // Features
-    void registerParticipant();  // Feature 1 : Wong Jia Hui
-    void participantSelfCheck(); // Feature 2 : Lee Mei Shuet
-    void sortParticipantList();  // Feature 3 : Loh Su Ting
-    void attendanceDashboard();  // Feature 4 : Christ Ting Shin Ling
-    void checkInParticipant(std::string eventID);   // Feature 5 : Wong Jia Hui
-    void viewCheckInStatus(std::string eventID);    // Feature 6 : Lee Mei Shuet
-    void createEvent();                             // Feature 7 : Loh Su Ting
-    void checkCapacityAlert(std::string eventID);   // Feature 8 : Christ Ting Shin Ling
+    void registerParticipant();  // Feature 1： Wong Jia Hui
+    // void participantSelfCheck(); // Feature 2： Lee Mei Shuet
+    // void sortParticipantList();  // Feature 3: Loh Su Ting
+    // void attendanceDashboard();  // Feature 4: Christ Ting Shin Ling
+    void checkInParticipant(std::string eventID);   // Feature 5： Wong Jia Hui
+    // void viewCheckInStatus(std::string eventID);    // Feature 6: Lee Mei Shuet
+    // void createEvent();                             // Feature 7: Loh Su Ting
+    // void checkCapacityAlert(std::string eventID);   // Feature 8: Christ Ting Shin Ling
+    void deleteParticipant(); //Feature 9: Wong Jia Hui
 
-    // sub functions (search & sort)
-    int searchParticipantByID(std::string id);
-    int searchParticipantByEmail(std::string email);
-    int searchEventByID(std::string eventID);
-    int SequenceSearchParticipant(std::string search_key, Participant array[], int array_size, bool searchByID);
-    int SequenceSearchEvent(std::string search_key, Event array[], int array_size);
-    void sortByName();
-    void sortByRegistrationTime();
-    void sortByID();
+    // Search functions
+    Participant* searchParticipantByID(std::string id);
+    Participant* searchParticipantByEmail(std::string email);
+    Event* searchEventByID(std::string eventID);
+    
+    Participant* SequenceSearchParticipant(std::string search_key, bool searchByID);
+    Event* SequenceSearchEvent(std::string search_key);
+
+    // void sortByName();
+    // void sortByRegistrationTime();
+    // void sortByID();
 
     // login function
-    int loginOrganizer();
+    EventOrganizer* loginOrganizer();
     bool loginAdmin();
 
     // ID generation
     std::string generateParticipantID();
     
     // Display functions
-    void displayRegistrationInfo(const Participant &participant);
+    void displayRegistrationInfo(Participant* participant);
 
     // File handling functions
     void loadEventsFromFile();

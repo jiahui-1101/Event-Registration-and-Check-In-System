@@ -8,6 +8,7 @@ Event::Event() {
     eventTime = "";
     venue = "";
     capacity = 0;
+    next = NULL;
 }
 
 Event::Event(string id, string name, string date, string time, string v, int cap)
@@ -18,6 +19,7 @@ Event::Event(string id, string name, string date, string time, string v, int cap
     eventTime = time;
     venue = v;
     capacity = cap;
+    next = NULL;
 }
 
 string Event::getEventID() const {
@@ -37,4 +39,12 @@ string Event::getVenue() const {
 }
 int Event::getCapacity() const {
     return capacity;
+}
+
+Event* Event::getNext() const {
+    return next;
+}
+
+void Event::setNext(Event* nextNode) {
+    next = nextNode;
 }
