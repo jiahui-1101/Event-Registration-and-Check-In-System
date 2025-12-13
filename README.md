@@ -62,6 +62,10 @@ To develop a system that allows participants to register and verify for events, 
    * Blocks check-ins when the event reaches maximum capacity.
    * Alerts organizer to prevent overcrowding.
 
----
-just simple explanation version
+9. **Remove Participant**
 
+   * Identifies the participant by ID.
+   * Removes their record from the list.
+   * Updates the total participant count.
+
+---
