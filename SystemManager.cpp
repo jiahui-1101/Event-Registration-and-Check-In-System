@@ -197,10 +197,10 @@ void SystemManager::adminMenu()
         switch (choice)
         {
         case 1:
-            // createEvent();
+            createEvent();
             break; // Feature 7 : Loh Su Ting
         case 2:
-            // sortParticipantList();
+            sortParticipantList();
             break; // Feature 3 : Loh Su Ting
         case 3:
             // attendanceDashboard();
@@ -354,52 +354,35 @@ if (p != NULL)
      cin.get();
  }
 
-// void SystemManager::sortParticipantList()
-// {
-//     int choice;
+void SystemManager::sortParticipantList()
+{
+    if (participantHead == NULL || participantHead->getNext() == NULL) {
+        cout << "⚠️ No participants to sort or only one participant.\n";
+        return;
+    }
 
-//     if (participantCount == 0)
-//     {
-//         cout << "⚠️ No participants to sort.\n";
-//         return;
-//     }
+    int choice;
+    cout << "\n--- Sort Participants ---\n";
+    cout << "1. Name (Alphabetical)\n";
+    cout << "2. Participant ID (Ascending)\n";
+    cout << "3. Registration Time (Newest First)\n";
+    cout << "0. Cancel\n";
+    cout << "Enter choice: ";
+    cin >> choice;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-//     cout << "Sort by:\n";
-//     cout << "1. Name (Alphabetical)\n";
-//     cout << "2. Participant ID (Ascending)\n";
-//     cout << "3. Registration Time (Newest First)\n";
-//     cout << "0. Cancel\n";
-//     cout << "Enter your choice: ";
-
-//     cin >> choice;
-//     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-//     switch (choice)
-//     {
-//     case 1:
-//         sortByName();
-//         cout << "✅ Participant list sorted by Name.\n";
-//         break;
-//     case 2:
-//         sortByID();
-//         cout << "✅ Participant list sorted by ID.\n";
-//         break;
-//     case 3:
-//         sortByRegistrationTime();
-//         cout << "✅ Participant list sorted by Registration Time (Newest First).\n";
-//         break;
-//     case 0:
-//         cout << "Sort cancelled.\n";
-//         return;
-//     default:
-//         cout << "Invalid choice. Sort cancelled.\n";
-//     }
-
-//     saveParticipantsToFile();
-
-//     cout << "\nPress Enter to continue...";
-//     cin.get();
-// }
+    switch (choice) {
+        case 1: sortByName(); cout << "✅ Sorted by Name.\n"; break;
+        case 2: sortByID(); cout << "✅ Sorted by ID.\n"; break;
+        case 3: sortByRegistrationTime(); cout << "✅ Sorted by Time.\n"; break;
+        case 0: return;
+        default: cout << "Invalid choice.\n"; return;
+    }
+    
+    saveParticipantsToFile();
+    cout << "Press Enter to continue...";
+    cin.get();
+}
 
 // // Feature 4: attendance dashboard
 // void SystemManager::attendanceDashboard()
@@ -655,59 +638,83 @@ void SystemManager::checkInParticipant(string eventID)
 //     cin.get();
 // }
 
-// void SystemManager::createEvent()
-// {
-//     if (eventCount >= 100)
-//     {
-//         cout << "❌ Error: Event database is full! (Max 100 events).\n";
-//         return;
-//     }
+void SystemManager::createEvent()
+{
+    if (eventCount >= 100) {
+        cout << "❌ Error: Event limit reached.\n";
+        return;
+    }
 
-//     string id, name, date, time, venue;
-//     int capacity;
+    string id, name, date, time, venue;
+    int capacity;
 
-//     // STEP 1: Event ID (must be unique)
-//     while (true)
-//     {
-//         cout << "Enter new Event ID (e.g., E001): ";
-//         getline(cin, id);
+    cout << "\n--- [Feature 7] Create New Event ---\n";
 
-//         if (searchEventByID(id) == -1)
-//         {
-//             break; // ID is unique
-//         }
-//         cout << "❌ Error: Event ID '" << id << "' already exists. Try again.\n";
-//     }
+    while (true)
+    {
+        cout << "Enter new Event ID (e.g., E001): ";
+        getline(cin, id);
 
-//     // STEP 2: Get other details
-//     cout << "Enter Event Name: ";
-//     getline(cin, name);
-//     cout << "Enter Date (DD/MM/YYYY): ";
-//     getline(cin, date);
-//     cout << "Enter Time (HH:MM AM/PM): ";
-//     getline(cin, time);
-//     cout << "Enter Venue: ";
-//     getline(cin, venue);
+        if (id.empty()) {
+            cout << "❌ ID cannot be empty.\n";
+            continue;
+        }
 
-//     // STEP 3: Capacity Input (must be a positive number)
-//     cout << "Enter Max Capacity: ";
-//     while (!(cin >> capacity) || capacity <= 0)
-//     {
-//         cout << "❌ Invalid input. Capacity must be a positive number. Enter again: ";
-//         cin.clear();
-//         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-//     }
-//     cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear buffer after int input
+        if (searchEventByID(id) == NULL)
+        {
+            break;
+        }
+        cout << "❌ Error: Event ID '" << id << "' already exists. Try again.\n";
+    }
 
-//     // STEP 4: Add to system and save
-//     Event newEvent(id, name, date, time, venue, capacity);
-//     events[eventCount++] = newEvent;
+    do {
+        cout << "Enter Event Name: ";
+        getline(cin, name);
+    } while (name.empty() && cout << "❌ Name cannot be empty.\n");
 
-//     cout << "\n✅ Event '" << name << "' created successfully!\n";
-//     cout << "ID: " << id << " | Capacity: " << capacity << endl;
+    cout << "Enter Date (DD/MM/YYYY): ";
+    getline(cin, date);
+    
+    cout << "Enter Time (HH:MM AM/PM): ";
+    getline(cin, time);
+    
+    cout << "Enter Venue: ";
+    getline(cin, venue);
 
-//     saveEventsToFile();
-// }
+    while (true)
+    {
+        cout << "Enter Max Capacity: ";
+        if (cin >> capacity && capacity > 0)
+        {
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            break;
+        }
+        else
+        {
+            cout << "❌ Invalid capacity. Must be > 0.\n";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+    }
+
+    Event* newEvent = new Event(id, name, date, time, venue, capacity);
+    
+    if (eventHead == NULL) {
+        eventHead = newEvent;
+    } else {
+        Event* curr = eventHead;
+        while (curr->getNext() != NULL) {
+            curr = curr->getNext();
+        }
+        curr->setNext(newEvent);
+    }
+
+    eventCount++;
+    cout << "\n✅ Event '" << name << "' created successfully!\n";
+    
+    saveEventsToFile(); 
+}
+
 void SystemManager::deleteParticipant()
 {
     cout << "\n--- Delete Participant ---\n";
@@ -800,80 +807,98 @@ Event *SystemManager::SequenceSearchEvent(string search_key)
 // // =======================
 
 // // insertion sort
-// void SystemManager::sortByName()
-// {
-//     if (participantCount <= 1)
-//     {
-//         return;
-//     }
+// 1. Insertion Sort - Sorting by Name
+void SystemManager::sortByName()
+{
+    if (participantHead == NULL || participantHead->getNext() == NULL) {
+        return;
+    }
 
-//     for (int i = 1; i < participantCount; i++)
-//     {
-//         Participant key = participants[i];
-//         int j = i - 1;
+    Participant* sortedHead = NULL; 
+    Participant* curr = participantHead; 
 
-//         while (j >= 0 && participants[j].getName() > key.getName())
-//         {
-//             participants[j + 1] = participants[j];
-//             j = j - 1;
-//         }
+    while (curr != NULL)
+    {
+        Participant* nextNode = curr->getNext(); 
 
-//         participants[j + 1] = key;
-//     }
-// }
+        if (sortedHead == NULL || curr->getName() < sortedHead->getName())
+        {
+            curr->setNext(sortedHead);
+            sortedHead = curr;
+        }
+        else
+        {
+            Participant* temp = sortedHead;
+            while (temp->getNext() != NULL && temp->getNext()->getName() < curr->getName())
+            {
+                temp = temp->getNext();
+            }
+            curr->setNext(temp->getNext());
+            temp->setNext(curr);
+        }
 
-// // bubble sort
-// void SystemManager::sortByRegistrationTime()
-// {
-//     if (participantCount <= 1)
-//     {
-//         return;
-//     }
+        curr = nextNode; 
+    }
 
-//     for (int i = 0; i < participantCount - 1; i++)
-//     {
-//         for (int j = 0; j < participantCount - i - 1; j++)
-//         {
-//             if (participants[j].getRegistrationTime() < participants[j + 1].getRegistrationTime())
-//             {
-//                 Participant temp = participants[j];
-//                 participants[j] = participants[j + 1];
-//                 participants[j + 1] = temp;
-//             }
-//         }
-//     }
-// }
+    participantHead = sortedHead;
+}
 
-// // selection sort
-// void SystemManager::sortByID()
-// {
-//     if (participantCount <= 1)
-//     {
-//         return;
-//     }
+// 2. Selection Sort - Sorting by ID
+void SystemManager::sortByID()
+{
+    if (participantHead == NULL) return;
 
-//     int min_idx;
+    Participant* curr = participantHead;
 
-//     for (int i = 0; i < participantCount - 1; i++)
-//     {
-//         min_idx = i;
+    while (curr != NULL)
+    {
+        Participant* minNode = curr;
+        Participant* r = curr->getNext();
 
-//         for (int j = i + 1; j < participantCount; j++)
-//         {
-//             if (participants[j].getID() < participants[min_idx].getID())
-//             {
-//                 min_idx = j;
-//             }
-//         }
+        while (r != NULL)
+        {
+            if (r->getID() < minNode->getID())
+            {
+                minNode = r;
+            }
+            r = r->getNext();
+        }
 
-//         if (min_idx != i)
-//         {
-//             Participant temp = participants[i];
-//             participants[i] = participants[min_idx];
-//             participants[min_idx] = temp;
-//         }
-//     }
-// }
+        if (minNode != curr)
+        {
+            curr->swapData(minNode); 
+        }
+
+        curr = curr->getNext();
+    }
+}
+
+// 3. Bubble Sort - Sorting by Registration Time
+void SystemManager::sortByRegistrationTime()
+{
+    if (participantHead == NULL) return;
+
+    bool swapped;
+    Participant* ptr1;
+    Participant* lptr = NULL; 
+
+    do
+    {
+        swapped = false;
+        ptr1 = participantHead;
+
+        while (ptr1->getNext() != lptr)
+        {
+            if (ptr1->getRegistrationTime() < ptr1->getNext()->getRegistrationTime())
+            {
+                ptr1->swapData(ptr1->getNext());
+                swapped = true;
+            }
+            ptr1 = ptr1->getNext();
+        }
+        lptr = ptr1;
+    } while (swapped);
+}
 
 // =======================
 // LOGIN FUNCTIONS

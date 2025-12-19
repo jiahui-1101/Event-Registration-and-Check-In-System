@@ -91,3 +91,20 @@ void Participant::setNext(Participant* nextNode)
 {
     next = nextNode;
 }
+
+void Participant::setID(string newID)
+{
+    id = newID;
+}
+
+void Participant::swapData(Participant* other)
+{
+    swap(id, other->id);
+    swap(name, other->name);
+    swap(email, other->email);
+    swap(eventID, other->eventID);
+    swap(registrationTime, other->registrationTime);
+    swap(checkedIn, other->checkedIn);
+    swap(checkInTime, other->checkInTime);
+}
+

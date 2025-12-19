@@ -32,6 +32,8 @@ public:
     void setEventID(std::string newEvent);
     Participant* getNext() const;
     void setNext(Participant* nextNode);
+    void setID(std::string newID);        
+    void swapData(Participant* other);
 };
 
 #endif

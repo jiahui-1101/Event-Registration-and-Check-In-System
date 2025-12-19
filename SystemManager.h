@@ -19,7 +19,7 @@ private:
     EventOrganizer* organizerHead;
     int organizerCount;
 
-    // void swapParticipantData(Participant* a, Participant* b);
+    void swapParticipantData(Participant* a, Participant* b);
 
 public:
     SystemManager();
@@ -35,11 +35,11 @@ public:
     // Features
     void registerParticipant();  // Feature 1： Wong Jia Hui
     void participantSelfCheck(); // Feature 2： Lee Mei Shuet
-    // void sortParticipantList();  // Feature 3: Loh Su Ting
+    void sortParticipantList();  // Feature 3: Loh Su Ting
     // void attendanceDashboard();  // Feature 4: Christ Ting Shin Ling
     void checkInParticipant(std::string eventID);   // Feature 5： Wong Jia Hui
     void viewCheckInStatus(std::string eventID);    // Feature 6: Lee Mei Shuet
-    // void createEvent();                             // Feature 7: Loh Su Ting
+    void createEvent();                             // Feature 7: Loh Su Ting
     // void checkCapacityAlert(std::string eventID);   // Feature 8: Christ Ting Shin Ling
     void deleteParticipant(); //Feature 9: Wong Jia Hui
 
@@ -51,9 +51,9 @@ public:
     Participant* SequenceSearchParticipant(std::string search_key, bool searchByID);
     Event* SequenceSearchEvent(std::string search_key);
 
-    // void sortByName();
-    // void sortByRegistrationTime();
-    // void sortByID();
+    void sortByName();
+    void sortByRegistrationTime();
+    void sortByID();
 
     // login function
     EventOrganizer* loginOrganizer();
