@@ -36,11 +36,11 @@ public:
     void registerParticipant();  // Feature 1： Wong Jia Hui
     void participantSelfCheck(); // Feature 2： Lee Mei Shuet
     void sortParticipantList();  // Feature 3: Loh Su Ting
-    // void attendanceDashboard();  // Feature 4: Christ Ting Shin Ling
+    void attendanceDashboard();  // Feature 4: Christ Ting Shin Ling
     void checkInParticipant(std::string eventID);   // Feature 5： Wong Jia Hui
     void viewCheckInStatus(std::string eventID);    // Feature 6: Lee Mei Shuet
     void createEvent();                             // Feature 7: Loh Su Ting
-    // void checkCapacityAlert(std::string eventID);   // Feature 8: Christ Ting Shin Ling
+    void checkCapacityAlert(std::string eventID);   // Feature 8: Christ Ting Shin Ling
     void deleteParticipant(); //Feature 9: Wong Jia Hui
 
     // Search functions
