@@ -109,8 +109,10 @@ void SystemManager::participantMenu()
     do
     {
         cout << "\n------ PARTICIPANT MENU ------\n";
-        cout << "1. Register for Event\n";
+        cout << "1. Add Registration Request (Queue)\n";
         cout << "2. Check Registration Status\n";
+        cout << "3. Process Next Registration (Dequeue)\n";
+        cout << "4. View Queue Size / Position\n";
         cout << "0. Back to Main Menu\n";
         cout << "Enter your choice: ";
         cin >> choice;
@@ -119,11 +121,20 @@ void SystemManager::participantMenu()
         switch (choice)
         {
         case 1:
-            registerParticipant();
-            break; // Feature 1 : Wong Jia Hui
+            registerParticipant(); // now enqueue
+            break;
         case 2:
             participantSelfCheck();
-            break; // Feature 2 : Lee Mei Shuet
+            break;
+        case 3:
+            processNextRegistration();
+            break;
+        case 4:
+            cout << "\nRegistration Queue Size: " << registrationQueue.size() << endl;
+            cout << "Waiting List Queue Size: " << waitingListQueue.size() << endl;
+            cout << "Press Enter to continue...";
+            cin.get();
+            break;
         case 0:
             return;
         default:
@@ -144,10 +155,12 @@ void SystemManager::organizerMenu(EventOrganizer *org)
     do
     {
         cout << "\n------ EVENT ORGANIZER MENU ------\n";
-        cout << "1. Check-In Participant\n";
+        cout << "1. Check-In Participant (Manual)\n";
         cout << "2. View Checked-in & Not Checked-in Participants\n";
         cout << "3. Check Capacity Alert\n";
         cout << "4. Delete Participant\n";
+        cout << "5. Add Arrived Participant to Check-in Queue\n";
+        cout << "6. Serve Next from Check-in Queue (Dequeue)\n";
         cout << "0. Back to Main Menu\n";
         cout << "Enter your choice: ";
         cin >> choice;
@@ -162,10 +175,25 @@ void SystemManager::organizerMenu(EventOrganizer *org)
             viewCheckInStatus(eventID);
             break;
         case 3:
-             checkCapacityAlert(eventID);
+            checkCapacityAlert(eventID);
             break;
         case 4:
             deleteParticipant();
+            break;
+        case 5:
+        {
+            string pid;
+            cout << "Enter Participant ID to enqueue: ";
+            getline(cin, pid);
+            CheckInRequest r{pid, eventID};
+            checkInQueue.enqueue(r);
+            cout << "✅ Added to Check-in Queue. Position: " << checkInQueue.size() << endl;
+            cout << "Press Enter to continue...";
+            cin.get();
+            break;
+        }
+        case 6:
+            processNextCheckIn();
             break;
         case 0:
             return;
@@ -186,9 +214,11 @@ void SystemManager::adminMenu()
     do
     {
         cout << "\n------ ADMIN MENU ------\n";
-        cout << "1. Create Event\n";
-        cout << "2. Sort Participant List\n";
-        cout << "3. Attendance Dashboard\n";
+        cout << "1. Create Event (Manual)\n";
+        cout << "2. Sort Participant List (Manual)\n";
+        cout << "3. Attendance Dashboard (Manual)\n";
+        cout << "4. Add Admin Request to Queue\n";
+        cout << "5. Process Next Admin Request (Dequeue)\n";
         cout << "0. Back to Main Menu\n";
         cout << "Enter your choice: ";
         cin >> choice;
@@ -198,13 +228,46 @@ void SystemManager::adminMenu()
         {
         case 1:
             createEvent();
-            break; // Feature 7 : Loh Su Ting
+            break;
         case 2:
             sortParticipantList();
-            break; // Feature 3 : Loh Su Ting
+            break;
         case 3:
             attendanceDashboard();
-            break; // Feature 4 : Christ Ting Shin Ling
+            break;
+        case 4:
+        {
+            int c;
+            cout << "\n--- Add Admin Request ---\n";
+            cout << "1. CREATE_EVENT\n";
+            cout << "2. SORT\n";
+            cout << "3. DASHBOARD\n";
+            cout << "Enter request: ";
+            cin >> c;
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+            AdminRequest r;
+            if (c == 1)
+                r.command = "CREATE_EVENT";
+            else if (c == 2)
+                r.command = "SORT";
+            else if (c == 3)
+                r.command = "DASHBOARD";
+            else
+            {
+                cout << "Invalid.\n";
+                break;
+            }
+
+            adminQueue.enqueue(r);
+            cout << "✅ Added to Admin Queue. Queue size: " << adminQueue.size() << endl;
+            cout << "Press Enter to continue...";
+            cin.get();
+            break;
+        }
+        case 5:
+            processNextAdminRequest();
+            break;
         case 0:
             return;
         default:
@@ -221,11 +284,11 @@ void SystemManager::registerParticipant()
 {
     string name, email, eventID;
 
-    cout << "\n--- Participant Registration ---\n";
+    cout << "\n--- Add Registration Request (Queue) ---\n";
 
-    // STEP 1: INPUT NAME & EMAIL
     cout << "Enter Name: ";
     getline(cin, name);
+
     while (true)
     {
         cout << "Enter Email: ";
@@ -235,7 +298,6 @@ void SystemManager::registerParticipant()
         cout << "❌ Invalid email format. Please try again.\n";
     }
 
-    // STEP 2: CHECK EXISTING PARTICIPANT
     Participant *existingParticipant = searchParticipantByEmail(email);
 
     if (existingParticipant != NULL)
@@ -255,7 +317,6 @@ void SystemManager::registerParticipant()
         }
     }
 
-    // STEP 3: Event ID Validation
     int attempts = 0;
     while (attempts < 3)
     {
@@ -265,18 +326,12 @@ void SystemManager::registerParticipant()
         if (searchEventByID(eventID) != NULL)
         {
             if (existingParticipant != NULL && existingParticipant->getEventID() == eventID)
-            {
                 cout << "❌ You are already registered for this event! Choose another.\n";
-            }
             else
-            {
                 break;
-            }
         }
         else
-        {
             cout << "❌ This Event ID does not exist.\n";
-        }
 
         attempts++;
         if (attempts == 3)
@@ -286,23 +341,13 @@ void SystemManager::registerParticipant()
         }
     }
 
-    // STEP 4: Create Data
-    string newID = generateParticipantID();
-    time_t now = time(0);
-    string registrationTime = ctime(&now);
-    if (!registrationTime.empty() && registrationTime.back() == '\n')
-        registrationTime.pop_back();
+    RegistrationRequest req{name, email, eventID};
+    registrationQueue.enqueue(req);
 
-    // STEP 5: Add to Linked List
-    Participant *newParticipant = new Participant(newID, name, email, eventID, registrationTime);
-    newParticipant->setNext(participantHead);
-    participantHead = newParticipant;
-
-    participantCount++;
-
-    cout << "\n✅ Successfully registered!\n";
-    displayRegistrationInfo(newParticipant);
-    saveParticipantsToFile();
+    cout << "\n✅ Added to Registration Queue.\n";
+    cout << "📌 Your position in queue: " << registrationQueue.size() << endl;
+    cout << "Press Enter to continue...";
+    cin.get();
 }
 
 void SystemManager::participantSelfCheck()
@@ -313,50 +358,51 @@ void SystemManager::participantSelfCheck()
     cout << "Please Enter your Email or Participant ID to verify: ";
     getline(cin, input);
     // search participant by email first
-    Participant* p = searchParticipantByEmail(input);
+    Participant *p = searchParticipantByEmail(input);
 
     // if email not found, search by ID
     if (p == NULL)
     {
         p = searchParticipantByID(input);
     }
-    
+
     // if participant found
-if (p != NULL)
+    if (p != NULL)
     {
         string eventName = "Unknown Event";
-        Event* eventObj = searchEventByID(p->getEventID());
+        Event *eventObj = searchEventByID(p->getEventID());
         if (eventObj != NULL)
         {
             eventName = eventObj->getEventName();
         }
 
-         cout << "\n✅ Record Found!\n";
-         cout << "=================================\n";
-         cout << "Name: " << p->getName()<< "\n";
-         // cout << "Event ID: " << p->getEventID() << "\n";
-         cout << "Event: " << eventName << " (" << p->getEventID() << ")\n";
-         cout << "Registration Time: " << p->getRegistrationTime() << "\n";
-         // display check-in status
-         cout << "Status: " << (p->isCheckedIn() ? "Checked-In" : "Registered Only") << "\n";
+        cout << "\n✅ Record Found!\n";
+        cout << "=================================\n";
+        cout << "Name: " << p->getName() << "\n";
+        // cout << "Event ID: " << p->getEventID() << "\n";
+        cout << "Event: " << eventName << " (" << p->getEventID() << ")\n";
+        cout << "Registration Time: " << p->getRegistrationTime() << "\n";
+        // display check-in status
+        cout << "Status: " << (p->isCheckedIn() ? "Checked-In" : "Registered Only") << "\n";
 
-         if (p->isCheckedIn())
-         {
-             cout << "Check-in Time: " << p->getCheckInTime() << "\n";
-         }
-         cout << "=================================\n";
-     }
+        if (p->isCheckedIn())
+        {
+            cout << "Check-in Time: " << p->getCheckInTime() << "\n";
+        }
+        cout << "=================================\n";
+    }
     else
-     {
+    {
         cout << "❌ Participant not found.\n";
-     }
-     cout << "\nPress Enter to continue...";
-     cin.get();
- }
+    }
+    cout << "\nPress Enter to continue...";
+    cin.get();
+}
 
 void SystemManager::sortParticipantList()
 {
-    if (participantHead == NULL || participantHead->getNext() == NULL) {
+    if (participantHead == NULL || participantHead->getNext() == NULL)
+    {
         cout << "⚠️ No participants to sort or only one participant.\n";
         return;
     }
@@ -371,20 +417,33 @@ void SystemManager::sortParticipantList()
     cin >> choice;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-    switch (choice) {
-        case 1: sortByName(); cout << "✅ Sorted by Name.\n"; break;
-        case 2: sortByID(); cout << "✅ Sorted by ID.\n"; break;
-        case 3: sortByRegistrationTime(); cout << "✅ Sorted by Time.\n"; break;
-        case 0: return;
-        default: cout << "Invalid choice.\n"; return;
+    switch (choice)
+    {
+    case 1:
+        sortByName();
+        cout << "✅ Sorted by Name.\n";
+        break;
+    case 2:
+        sortByID();
+        cout << "✅ Sorted by ID.\n";
+        break;
+    case 3:
+        sortByRegistrationTime();
+        cout << "✅ Sorted by Time.\n";
+        break;
+    case 0:
+        return;
+    default:
+        cout << "Invalid choice.\n";
+        return;
     }
-    
+
     saveParticipantsToFile();
     cout << "Press Enter to continue...";
     cin.get();
 }
 
-// Feature 4: Attendance Dashboard 
+// Feature 4: Attendance Dashboard
 void SystemManager::attendanceDashboard()
 {
     cout << "\n--- [Feature 4] Attendance Dashboard ---\n";
@@ -397,12 +456,12 @@ void SystemManager::attendanceDashboard()
     int totalNotCheckedIn = 0;
 
     // Use Linked List Traversal
-    Participant* curr = participantHead;
-    
+    Participant *curr = participantHead;
+
     while (curr != NULL)
     {
         totalRegistered++;
-        
+
         if (curr->isCheckedIn())
         {
             totalCheckedIn++;
@@ -411,7 +470,7 @@ void SystemManager::attendanceDashboard()
         {
             totalNotCheckedIn++;
         }
-        
+
         curr = curr->getNext();
     }
 
@@ -465,16 +524,16 @@ void SystemManager::checkInParticipant(string eventID)
             return;
         }
 
-        Event* eventObj = searchEventByID(eventID);
-        if (eventObj != NULL) 
+        Event *eventObj = searchEventByID(eventID);
+        if (eventObj != NULL)
         {
             int maxCap = eventObj->getCapacity();
             int currentCount = 0;
 
-            Participant* scanner = participantHead;
+            Participant *scanner = participantHead;
             while (scanner != NULL)
             {
-                if (scanner->getEventID() == eventID && scanner->isCheckedIn()) 
+                if (scanner->getEventID() == eventID && scanner->isCheckedIn())
                 {
                     currentCount++;
                 }
@@ -509,18 +568,18 @@ void SystemManager::checkInParticipant(string eventID)
     } while (continueChoice == 'y' || continueChoice == 'Y');
 }
 
- void SystemManager::viewCheckInStatus(string eventID)
- {
-     cout << "\n--- [Feature 6] Check-In Status List for Event: " << eventID << " ---\n";
+void SystemManager::viewCheckInStatus(string eventID)
+{
+    cout << "\n--- [Feature 6] Check-In Status List for Event: " << eventID << " ---\n";
 
-     // CREATE ARRAYS TO HOLD CHECKED-IN AND NOT CHECKED-IN PARTICIPANTS
-     Participant* checkedInList[1000];
-     Participant* notCheckedInList[1000];
-     int ciCount = 0;  // number of checked-in participants
-     int nciCount = 0; // number of not checked-in participants
+    // CREATE ARRAYS TO HOLD CHECKED-IN AND NOT CHECKED-IN PARTICIPANTS
+    Participant *checkedInList[1000];
+    Participant *notCheckedInList[1000];
+    int ciCount = 0;  // number of checked-in participants
+    int nciCount = 0; // number of not checked-in participants
 
-     // TRANVERSING participant list, filtering checked-in and not checked-in
-    Participant* curr = participantHead; // start from head
+    // TRANVERSING participant list, filtering checked-in and not checked-in
+    Participant *curr = participantHead; // start from head
     while (curr != NULL)
     {
         if (curr->getEventID() == eventID)
@@ -539,72 +598,72 @@ void SystemManager::checkInParticipant(string eventID)
         curr = curr->getNext(); // move to next participant
     }
 
-     // SORTING (BUBBLE SORT)
-     for (int i = 0; i < ciCount - 1; i++)
-     { // SORTING checked-in list
-         for (int j = 0; j < ciCount - i - 1; j++)
-         {
-             // COMPARING NAMES, SWAP IF j > j+1
-             if (checkedInList[j]->getName() > checkedInList[j + 1]->getName())
-             {
-                 // swap(checkedInList[j], checkedInList[j + 1]);
-                 Participant* temp = checkedInList[j];
-                 checkedInList[j] = checkedInList[j + 1];
-                 checkedInList[j + 1] = temp;
-             }
-         }
-     }
+    // SORTING (BUBBLE SORT)
+    for (int i = 0; i < ciCount - 1; i++)
+    { // SORTING checked-in list
+        for (int j = 0; j < ciCount - i - 1; j++)
+        {
+            // COMPARING NAMES, SWAP IF j > j+1
+            if (checkedInList[j]->getName() > checkedInList[j + 1]->getName())
+            {
+                // swap(checkedInList[j], checkedInList[j + 1]);
+                Participant *temp = checkedInList[j];
+                checkedInList[j] = checkedInList[j + 1];
+                checkedInList[j + 1] = temp;
+            }
+        }
+    }
 
-     for (int i = 0; i < nciCount - 1; i++)
-        { // SORTING not checked-in list
-         for (int j = 0; j < nciCount - i - 1; j++)
-         {
-             // COMPARING NAMES, SWAP IF j > j+1
-             if (notCheckedInList[j]->getName() > notCheckedInList[j + 1]->getName())
-             {
-                 Participant* temp = notCheckedInList[j];
-                 notCheckedInList[j] = notCheckedInList[j + 1];
-                 notCheckedInList[j + 1] = temp;
-             }
-         }
-     }
-     // DISPLAYING CHECKED-IN PARTICIPANTS
-     cout << "\n--- Checked-In Participants ---\n";
-     cout << left << setw(10) << "ID" << setw(25) << "Name" << "Check-in Time\n";
-     cout << "----------------------------------------------------------------\n";
-     if (ciCount == 0)
-         cout << "(None)\n";
-     for (int i = 0; i < ciCount; i++)
-     {
-         cout << left << setw(10) << checkedInList[i]->getID()
-              << setw(25) << checkedInList[i]->getName()
-              << checkedInList[i]->getCheckInTime() << "\n";
-     }
+    for (int i = 0; i < nciCount - 1; i++)
+    { // SORTING not checked-in list
+        for (int j = 0; j < nciCount - i - 1; j++)
+        {
+            // COMPARING NAMES, SWAP IF j > j+1
+            if (notCheckedInList[j]->getName() > notCheckedInList[j + 1]->getName())
+            {
+                Participant *temp = notCheckedInList[j];
+                notCheckedInList[j] = notCheckedInList[j + 1];
+                notCheckedInList[j + 1] = temp;
+            }
+        }
+    }
+    // DISPLAYING CHECKED-IN PARTICIPANTS
+    cout << "\n--- Checked-In Participants ---\n";
+    cout << left << setw(10) << "ID" << setw(25) << "Name" << "Check-in Time\n";
+    cout << "----------------------------------------------------------------\n";
+    if (ciCount == 0)
+        cout << "(None)\n";
+    for (int i = 0; i < ciCount; i++)
+    {
+        cout << left << setw(10) << checkedInList[i]->getID()
+             << setw(25) << checkedInList[i]->getName()
+             << checkedInList[i]->getCheckInTime() << "\n";
+    }
 
-     // DISPLAYING NOT CHECKED-IN PARTICIPANTS
-     cout << "\n--- Not Checked-In Participants ---\n";
-     cout << left << setw(10) << "ID" << setw(25) << "Name" << "Email\n";
-     cout << "----------------------------------------------------------------\n";
-     if (nciCount == 0)
-         cout << "(None)\n";
-     for (int i = 0; i < nciCount; i++)
-     {
-         cout << left << setw(10) << notCheckedInList[i]->getID()
-              << setw(25) << notCheckedInList[i]->getName()
-              << notCheckedInList[i]->getEmail() << "\n";
-     }
+    // DISPLAYING NOT CHECKED-IN PARTICIPANTS
+    cout << "\n--- Not Checked-In Participants ---\n";
+    cout << left << setw(10) << "ID" << setw(25) << "Name" << "Email\n";
+    cout << "----------------------------------------------------------------\n";
+    if (nciCount == 0)
+        cout << "(None)\n";
+    for (int i = 0; i < nciCount; i++)
+    {
+        cout << left << setw(10) << notCheckedInList[i]->getID()
+             << setw(25) << notCheckedInList[i]->getName()
+             << notCheckedInList[i]->getEmail() << "\n";
+    }
 
-     cout << "\nPress Enter to continue...";
-     cin.get();
- }
+    cout << "\nPress Enter to continue...";
+    cin.get();
+}
 
-// Feature 8: Capacity Monitor 
+// Feature 8: Capacity Monitor
 void SystemManager::checkCapacityAlert(string eventID)
 {
     cout << "\n--- [Feature 8] Capacity Monitor for Event: " << eventID << " ---\n";
 
     // 1. Find the Event to get Max Capacity
-    Event* eventObj = searchEventByID(eventID);
+    Event *eventObj = searchEventByID(eventID);
     if (eventObj == NULL)
     {
         cout << "❌ Error: Event not found.\n";
@@ -616,7 +675,7 @@ void SystemManager::checkCapacityAlert(string eventID)
 
     // 2. Count Current Check-Ins for this specific event using Linked List
     int currentCheckIns = 0;
-    Participant* curr = participantHead;
+    Participant *curr = participantHead;
 
     while (curr != NULL)
     {
@@ -635,7 +694,8 @@ void SystemManager::checkCapacityAlert(string eventID)
 
     // 4. Alert Logic
     double percentage = 0.0;
-    if (maxCapacity > 0) {
+    if (maxCapacity > 0)
+    {
         percentage = ((double)currentCheckIns / maxCapacity) * 100.0;
     }
 
@@ -659,7 +719,8 @@ void SystemManager::checkCapacityAlert(string eventID)
 
 void SystemManager::createEvent()
 {
-    if (eventCount >= 100) {
+    if (eventCount >= 100)
+    {
         cout << "❌ Error: Event limit reached.\n";
         return;
     }
@@ -674,7 +735,8 @@ void SystemManager::createEvent()
         cout << "Enter new Event ID (e.g., E001): ";
         getline(cin, id);
 
-        if (id.empty()) {
+        if (id.empty())
+        {
             cout << "❌ ID cannot be empty.\n";
             continue;
         }
@@ -686,17 +748,18 @@ void SystemManager::createEvent()
         cout << "❌ Error: Event ID '" << id << "' already exists. Try again.\n";
     }
 
-    do {
+    do
+    {
         cout << "Enter Event Name: ";
         getline(cin, name);
     } while (name.empty() && cout << "❌ Name cannot be empty.\n");
 
     cout << "Enter Date (DD/MM/YYYY): ";
     getline(cin, date);
-    
+
     cout << "Enter Time (HH:MM AM/PM): ";
     getline(cin, time);
-    
+
     cout << "Enter Venue: ";
     getline(cin, venue);
 
@@ -716,13 +779,17 @@ void SystemManager::createEvent()
         }
     }
 
-    Event* newEvent = new Event(id, name, date, time, venue, capacity);
-    
-    if (eventHead == NULL) {
+    Event *newEvent = new Event(id, name, date, time, venue, capacity);
+
+    if (eventHead == NULL)
+    {
         eventHead = newEvent;
-    } else {
-        Event* curr = eventHead;
-        while (curr->getNext() != NULL) {
+    }
+    else
+    {
+        Event *curr = eventHead;
+        while (curr->getNext() != NULL)
+        {
             curr = curr->getNext();
         }
         curr->setNext(newEvent);
@@ -730,8 +797,8 @@ void SystemManager::createEvent()
 
     eventCount++;
     cout << "\n✅ Event '" << name << "' created successfully!\n";
-    
-    saveEventsToFile(); 
+
+    saveEventsToFile();
 }
 
 void SystemManager::deleteParticipant()
@@ -741,7 +808,6 @@ void SystemManager::deleteParticipant()
     cout << "Enter Participant ID to delete: ";
     getline(cin, id);
 
-    // 1. Find the participant
     Participant *curr = participantHead;
     Participant *prev = NULL;
 
@@ -757,23 +823,27 @@ void SystemManager::deleteParticipant()
         return;
     }
 
-    // 2. Delete the participant
-    if (prev == NULL)
-    {
-        participantHead = curr->getNext();
-    }
+    // ✅ store eventID before delete
+    string eventID = curr->getEventID();
 
+    if (prev == NULL)
+        participantHead = curr->getNext();
     else
-    {
         prev->setNext(curr->getNext());
-    }
 
     cout << "🗑️ Deleted Participant: " << curr->getName() << endl;
     delete curr;
     participantCount--;
 
     saveParticipantsToFile();
+
+    // ✅ NEW: promote from waiting list if any
+    promoteFromWaitingList(eventID);
+
+    cout << "Press Enter to continue...";
+    cin.get();
 }
+
 // =======================
 // SEARCH METHODS
 // =======================
@@ -829,16 +899,17 @@ Event *SystemManager::SequenceSearchEvent(string search_key)
 // 1. Insertion Sort - Sorting by Name
 void SystemManager::sortByName()
 {
-    if (participantHead == NULL || participantHead->getNext() == NULL) {
+    if (participantHead == NULL || participantHead->getNext() == NULL)
+    {
         return;
     }
 
-    Participant* sortedHead = NULL; 
-    Participant* curr = participantHead; 
+    Participant *sortedHead = NULL;
+    Participant *curr = participantHead;
 
     while (curr != NULL)
     {
-        Participant* nextNode = curr->getNext(); 
+        Participant *nextNode = curr->getNext();
 
         if (sortedHead == NULL || curr->getName() < sortedHead->getName())
         {
@@ -847,7 +918,7 @@ void SystemManager::sortByName()
         }
         else
         {
-            Participant* temp = sortedHead;
+            Participant *temp = sortedHead;
             while (temp->getNext() != NULL && temp->getNext()->getName() < curr->getName())
             {
                 temp = temp->getNext();
@@ -856,7 +927,7 @@ void SystemManager::sortByName()
             temp->setNext(curr);
         }
 
-        curr = nextNode; 
+        curr = nextNode;
     }
 
     participantHead = sortedHead;
@@ -865,14 +936,15 @@ void SystemManager::sortByName()
 // 2. Selection Sort - Sorting by ID
 void SystemManager::sortByID()
 {
-    if (participantHead == NULL) return;
+    if (participantHead == NULL)
+        return;
 
-    Participant* curr = participantHead;
+    Participant *curr = participantHead;
 
     while (curr != NULL)
     {
-        Participant* minNode = curr;
-        Participant* r = curr->getNext();
+        Participant *minNode = curr;
+        Participant *r = curr->getNext();
 
         while (r != NULL)
         {
@@ -885,7 +957,7 @@ void SystemManager::sortByID()
 
         if (minNode != curr)
         {
-            curr->swapData(minNode); 
+            curr->swapData(minNode);
         }
 
         curr = curr->getNext();
@@ -895,11 +967,12 @@ void SystemManager::sortByID()
 // 3. Bubble Sort - Sorting by Registration Time
 void SystemManager::sortByRegistrationTime()
 {
-    if (participantHead == NULL) return;
+    if (participantHead == NULL)
+        return;
 
     bool swapped;
-    Participant* ptr1;
-    Participant* lptr = NULL; 
+    Participant *ptr1;
+    Participant *lptr = NULL;
 
     do
     {
@@ -1197,4 +1270,221 @@ void SystemManager::saveEventsToFile()
 
     file.close();
     cout << "💾 Saved " << eventCount << " events to file.\n";
+}
+
+int SystemManager::countRegisteredByEvent(const std::string &eventID) const
+{
+    int count = 0;
+    Participant *curr = participantHead;
+    while (curr != NULL)
+    {
+        if (curr->getEventID() == eventID)
+            count++;
+        curr = curr->getNext();
+    }
+    return count;
+}
+
+int SystemManager::countCheckedInByEvent(const std::string &eventID) const
+{
+    int count = 0;
+    Participant *curr = participantHead;
+    while (curr != NULL)
+    {
+        if (curr->getEventID() == eventID && curr->isCheckedIn())
+            count++;
+        curr = curr->getNext();
+    }
+    return count;
+}
+
+// dequeue registrationQueue -> register participant OR move to waiting list
+void SystemManager::processNextRegistration()
+{
+    if (registrationQueue.isEmpty())
+    {
+        cout << "\n⚠️ Registration Queue is empty.\n";
+        cout << "Press Enter to continue...";
+        cin.get();
+        return;
+    }
+
+    RegistrationRequest req;
+    registrationQueue.front(req);
+    registrationQueue.dequeue();
+
+    if (!registerParticipantFromRequest(req))
+    {
+        cout << "Press Enter to continue...";
+        cin.get();
+        return;
+    }
+
+    cout << "Press Enter to continue...";
+    cin.get();
+}
+
+bool SystemManager::registerParticipantFromRequest(const RegistrationRequest &req)
+{
+    Event *ev = searchEventByID(req.eventID);
+    if (ev == NULL)
+    {
+        cout << "\n❌ Event not found. Request discarded.\n";
+        return false;
+    }
+
+    int maxCap = ev->getCapacity();
+    int currentRegistered = countRegisteredByEvent(req.eventID);
+
+    if (currentRegistered >= maxCap)
+    {
+        waitingListQueue.enqueue(req);
+        cout << "\n⛔ Event FULL. Added to Waiting List Queue.\n";
+        cout << "Waiting list position: " << waitingListQueue.size() << endl;
+        return true;
+    }
+
+    // create participant
+    string newID = generateParticipantID();
+
+    time_t now = time(0);
+    string registrationTime = ctime(&now);
+    if (!registrationTime.empty() && registrationTime.back() == '\n')
+        registrationTime.pop_back();
+
+    Participant *newParticipant = new Participant(newID, req.name, req.email, req.eventID, registrationTime);
+    newParticipant->setNext(participantHead);
+    participantHead = newParticipant;
+    participantCount++;
+
+    cout << "\n✅ Registration processed (Dequeued).\n";
+    displayRegistrationInfo(newParticipant);
+    saveParticipantsToFile();
+    return true;
+}
+
+// dequeue checkInQueue -> check in participant by ID
+void SystemManager::processNextCheckIn()
+{
+    if (checkInQueue.isEmpty())
+    {
+        cout << "\n⚠️ Check-in Queue is empty.\n";
+        cout << "Press Enter to continue...";
+        cin.get();
+        return;
+    }
+
+    CheckInRequest r;
+    checkInQueue.front(r);
+    checkInQueue.dequeue();
+
+    bool ok = checkInParticipantByID(r.eventID, r.participantID);
+    if (!ok)
+    {
+        cout << "❌ Failed to check in this request.\n";
+    }
+
+    cout << "Press Enter to continue...";
+    cin.get();
+}
+
+bool SystemManager::checkInParticipantByID(const std::string &eventID, const std::string &participantID)
+{
+    Participant *p = searchParticipantByID(participantID);
+    if (p == NULL)
+    {
+        cout << "❌ Participant not found.\n";
+        return false;
+    }
+
+    if (p->getEventID() != eventID)
+    {
+        cout << "❌ Participant not registered for this event.\n";
+        return false;
+    }
+
+    if (p->isCheckedIn())
+    {
+        cout << "⚠️ Already checked in at " << p->getCheckInTime() << ".\n";
+        return false;
+    }
+
+    Event *eventObj = searchEventByID(eventID);
+    if (eventObj != NULL)
+    {
+        int maxCap = eventObj->getCapacity();
+        int currentCheckedIn = countCheckedInByEvent(eventID);
+
+        if (currentCheckedIn >= maxCap)
+        {
+            cout << "⛔ CHECK-IN BLOCKED: EVENT IS FULL.\n";
+            return false;
+        }
+    }
+
+    time_t now = time(0);
+    string checkInTime = ctime(&now);
+    if (!checkInTime.empty() && checkInTime.back() == '\n')
+        checkInTime.pop_back();
+
+    p->setCheckedIn(checkInTime);
+    cout << "✅ Checked in: " << p->getName() << " at " << checkInTime << endl;
+    saveParticipantsToFile();
+    return true;
+}
+
+// when slot available, promote next from waiting list
+void SystemManager::promoteFromWaitingList(const std::string &eventID)
+{
+    if (waitingListQueue.isEmpty())
+        return;
+
+    RegistrationRequest req;
+    waitingListQueue.front(req);
+
+    // Only promote if the HEAD of the queue matches the event
+    if (req.eventID != eventID)
+    {
+        return;
+    }
+
+    // Check capacity one last time to be safe
+    Event *ev = searchEventByID(eventID);
+    int maxCap = ev->getCapacity();
+    int currentRegistered = countRegisteredByEvent(eventID);
+
+    if (currentRegistered < maxCap)
+    {
+        waitingListQueue.dequeue(); // Actually remove them now
+        cout << "\n🎉 Slot available! Promoting " << req.name << " from waiting list...\n";
+
+        registerParticipantFromRequest(req);
+    }
+}
+
+// admin queue processing
+void SystemManager::processNextAdminRequest()
+{
+    if (adminQueue.isEmpty())
+    {
+        cout << "\n⚠️ Admin Queue is empty.\n";
+        cout << "Press Enter to continue...";
+        cin.get();
+        return;
+    }
+
+    AdminRequest r;
+    adminQueue.front(r);
+    adminQueue.dequeue();
+
+    cout << "\n--- Processing Admin Request: " << r.command << " ---\n";
+
+    if (r.command == "CREATE_EVENT")
+        createEvent();
+    else if (r.command == "SORT")
+        sortParticipantList();
+    else if (r.command == "DASHBOARD")
+        attendanceDashboard();
+    else
+        cout << "❌ Unknown admin command.\n";
 }
