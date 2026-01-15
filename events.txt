@@ -4,3 +4,4 @@ E003,AI Innovation Summit,2024-04-17,10:30:00,Conference Hall,150
 E004,Digital Marketing Masterclass,2024-04-18,13:00:00,Training Room,30
 E005,Leadership Symposium,2024-04-19,09:30:00,Grand Ballroom,100
 E009,Kitkat roadshow,20/12/2025,09:00 AM,UTM,100
+E015,HL ROADSHOW,02/02/2026,08:00 AM,SUB,2
