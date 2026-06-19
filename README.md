@@ -190,19 +190,6 @@ g++ main.cpp SystemManager.cpp Participant.cpp Event.cpp EventOrganizer.cpp -o e
 
 ---
 
-## 👥 Team Contributions
-
-| Team member | Role | Contributions evidenced in the repository | Visible non-merge commits* |
-|---|---|---|---:|
-| **Wong Jia Hui** | **Team Leader · System Integration Developer** | Integrated and revised the core classes; implemented assigned features 1, 5 and 9, search, menus, participant/event flows, file loading/saving, validation and project documentation. | **19 / 28** |
-| **Loh Su Ting** | **Event & Sorting Developer** | Implemented event creation, event persistence, linked-list updates and participant sorting methods. | **4 / 28** |
-| **Lee Mei Shuet** | **Registration Workflow Developer** | Implemented assigned features 2 and 6 using linked-list-based operations and contributed integration updates. | **3 / 28** |
-| **Christ Ting Shin Ling** | **Queue Workflow Developer** | Implemented assigned features 4 and 8 and their supporting `SystemManager` logic. | **2 / 28** |
-
-<sub>*Counts are non-merge commits visible in the public Git history. Feature numbers follow the team's original assignment labels in commit history.</sub>
-
----
-
 ## 📝 License
 
 This project is developed for **academic purposes** as part of coursework at **Universiti Teknologi Malaysia (UTM)**.
